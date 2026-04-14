@@ -1,19 +1,16 @@
 .login-page {
   position: relative;
-  background-image:
-    linear-gradient(rgba(15, 23, 42, 0.7), rgba(15, 23, 42, 0.7)),
-    url("https://images.unsplash.com/photo-1498050108023-c5249f4df085?auto=format&fit=crop&w=1600&q=80");
+  background-image: url("./red-background.jpg");
   background-size: cover;
   background-position: center;
   background-repeat: no-repeat;
-  color: #102a43;
 }
 
 .login-page::before {
   content: "";
   position: absolute;
   inset: 0;
-  background: rgba(9, 30, 66, 0.55);
+  background: rgba(9, 30, 66, 0.25);
   z-index: 0;
 }
 
