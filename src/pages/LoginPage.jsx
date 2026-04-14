@@ -1,4 +1,6 @@
 import {
+  GoogleAuthProvider,
+  signInWithPopup,
   createUserWithEmailAndPassword,
   getAuth,
   signInWithEmailAndPassword,
@@ -46,6 +48,17 @@ function LoginPage() {
     }
   };
 
+  const provider = new GoogleAuthProvider();
+
+  const handleGoogleLogin = async (e) => {
+    e.preventDefault();
+    try {
+      await signInWithPopup(auth, provider);
+    } catch (error) {
+      console.error(error);
+    }
+  };
+
   return (
     <div className="login-page d-flex align-items-center min-vh-100">
       <div className="container-fluid h-100">
@@ -63,6 +76,7 @@ function LoginPage() {
                 <button
                   type="button"
                   className="btn btn-outline-secondary btn-lg"
+                  onClick={handleGoogleLogin}
                 >
                   <i class="bi bi-google"></i> Sign up with Google
                 </button>
