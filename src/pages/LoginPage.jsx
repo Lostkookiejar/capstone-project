@@ -68,7 +68,7 @@ function LoginPage() {
               <div className="mb-4">
                 <h1 className="display-6 fw-bold mb-2">CherryPick</h1>
                 <p className="lead text-muted mb-0">
-                  Pick apart the Internet's opinions.
+                  Pick the Internet's tastes apart.
                 </p>
               </div>
 

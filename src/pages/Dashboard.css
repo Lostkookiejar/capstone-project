@@ -1,0 +1,61 @@
+.dashboard::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: rgba(9, 30, 66, 0.25);
+  z-index: 0;
+}
+.dashboard {
+  background: rgba(195, 1, 1, 1);
+}
+
+.dashboard .container {
+  position: relative;
+  z-index: 1;
+  max-width: 800px;
+}
+
+.logout-button {
+  position: relative;
+  padding: 0.5rem;
+}
+
+.create-card {
+  width: 100%;
+  min-width: 320px;
+  max-width: 800px;
+  background: rgba(255, 255, 255, 0.9);
+  margin-top: 1rem;
+  padding: 1rem;
+  border-radius: 1rem;
+}
+
+.card-header {
+  border-bottom: solid rgba(9, 30, 66, 0.25) 1px;
+}
+
+.review-card {
+  width: 100%;
+  min-width: 320px;
+  max-width: 800px;
+  background: linear-gradient(
+    45deg,
+    rgba(195, 1, 1, 1) 0%,
+    rgba(195, 1, 1, 0.8) 60%,
+    rgba(9, 30, 66, 0.85) 80%,
+    rgba(9, 30, 66, 0.9) 100%
+  );
+  margin-top: 1rem;
+  padding: 1rem;
+  border-radius: 1rem;
+}
+
+.card-header-white {
+  border-bottom: solid rgba(255, 255, 255, 0.7) 1px;
+  margin-bottom: 1rem;
+}
+
+.card-footer-white {
+  border-top: solid rgba(255, 255, 255, 0.7) 1px;
+  margin-top: 1rem;
+}
