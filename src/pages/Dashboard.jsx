@@ -1,12 +1,20 @@
 import { getAuth } from "firebase/auth";
-import { useContext, useEffect } from "react";
+import { useContext, useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { AuthContext } from "../components/AuthProvider";
-import { Container } from "react-bootstrap";
 import "./Dashboard.css";
 import { reviews } from "../components/testReviews";
+import { useDispatch, useSelector } from "react-redux";
+import {
+  increment,
+  decrement,
+  incrementByAmount,
+} from "../features/counter/counterSlice";
 
 function Dashboard() {
+  const count = useSelector((state) => state.counter.value);
+  const [input, setInput] = useState("");
+  const dispatch = useDispatch();
   const auth = getAuth();
   const navigate = useNavigate();
   const { currentUser } = useContext(AuthContext);
@@ -54,6 +62,13 @@ function Dashboard() {
               Create a New Review
             </button>
           </div>
+          <button onClick={() => dispatch(increment())}>Increment</button>
+          <button onClick={() => dispatch(decrement())}>Decrement</button>
+          <input type="number" onChange={(e) => setInput(e.target.value)} />
+          <button onClick={() => dispatch(incrementByAmount(parseInt(input)))}>
+            Increment By Amount
+          </button>
+          <p>Counter: {count}</p>
           <div className="create-card">
             <h1 className="card-header pb-2">
               <strong>Your Reviews</strong>
