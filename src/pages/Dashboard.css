@@ -1,6 +1,6 @@
 .dashboard::before {
   content: "";
-  position: absolute;
+  position: fixed;
   inset: 0;
   background: rgba(9, 30, 66, 0.25);
   z-index: 0;

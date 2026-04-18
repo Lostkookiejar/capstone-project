@@ -3,13 +3,8 @@ import { useContext, useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { AuthContext } from "../components/AuthProvider";
 import "./Dashboard.css";
-import { reviews } from "../components/testReviews";
-import { useDispatch, useSelector } from "react-redux";
-import {
-  increment,
-  decrement,
-  incrementByAmount,
-} from "../features/counter/counterSlice";
+import { useSelector } from "react-redux";
+
 import { Button, Modal } from "react-bootstrap";
 import ReviewModal from "../components/ReviewModal";
 
@@ -45,9 +40,7 @@ function Dashboard() {
 
   //react-redux, global state
   //const reviews = [];
-  const count = useSelector((state) => state.counter.value);
-  const [input, setInput] = useState("");
-  const dispatch = useDispatch();
+  const reviews = useSelector((state) => state.reviews.value);
 
   //modal visibility
   const [showModal, setShowModal] = useState(null);
@@ -77,22 +70,25 @@ function Dashboard() {
             Create a New Review
           </button>
         </div>
-        <button onClick={() => dispatch(increment())}>Increment</button>
-        <button onClick={() => dispatch(decrement())}>Decrement</button>
-        <input type="number" onChange={(e) => setInput(e.target.value)} />
-        <button onClick={() => dispatch(incrementByAmount(parseInt(input)))}>
-          Increment By Amount
-        </button>
-        <p>Counter: {count}</p>
+
         <div className="create-card">
           <h1 className="card-header pb-2">
             <strong>Your Reviews</strong>
           </h1>
+          {!reviews[0] && (
+            <button
+              type="button"
+              className="btn btn-link text-decoration-none text-secondary"
+              onClick={handleCreateModal}
+            >
+              Create a New Review
+            </button>
+          )}
           {reviews[0] &&
             reviews.map((review, index) => (
               <div key={index} className="review-card text-white">
                 <div className="card-header-white">
-                  <h1>{reviews[0].name}</h1>
+                  <h1>{review.name}</h1>
                 </div>
                 <div className="row w-100">
                   <div className="col-sm-3">
@@ -110,10 +106,15 @@ function Dashboard() {
                 </div>
                 <div className="card-footer-white">
                   <div className="row">
-                    <div className="col-8">
+                    <div className="col-5">
+                      <strong>Created: </strong>
                       <small>{review.created_at}</small>
                     </div>
-                    <div className="col-4">{generateIcons(review.rating)}</div>
+                    <div className="col-5">
+                      <strong>Playtime: </strong>
+                      <small>{review.playtime} hrs</small>
+                    </div>
+                    <div className="col-2">{generateIcons(review.rating)}</div>
                   </div>
                 </div>
               </div>

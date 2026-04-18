@@ -1,16 +1,40 @@
 import { useEffect, useState } from "react";
-import { Button, FormControl, Modal, Spinner } from "react-bootstrap";
+import {
+  Button,
+  FormCheck,
+  FormControl,
+  Modal,
+  Spinner,
+} from "react-bootstrap";
+import { useDispatch } from "react-redux";
+import { addReview } from "../features/reviews/reviewSlice";
 
 export default function ReviewModal({ show, onHide }) {
+  //redux
+  const dispatch = useDispatch();
+
   //input field state
+  const [modalSize, setModalSize] = useState("");
   const [name, setName] = useState("");
   const [errorMessage, setErrorMessage] = useState("");
   const [game, setGame] = useState(null);
   const [queryLoading, setQueryLoading] = useState(false);
+  const [createForm, setCreateForm] = useState(false);
+
+  //input field state after game is set
+  const [newContent, setNewContent] = useState("");
+  const [newPlaytime, setNewPlaytime] = useState("");
+  const [newRating, setNewRating] = useState("");
 
   const handleOnHide = () => {
     onHide();
     setName("");
+    setQueryLoading(false);
+    setCreateForm(false);
+    setModalSize("");
+    setNewContent("");
+    setNewPlaytime("");
+    setNewRating("");
   };
 
   //clears game if user deletes search query
@@ -23,8 +47,8 @@ export default function ReviewModal({ show, onHide }) {
   //on user query
   const handleQuery = () => {
     if (game) return;
-    console.log("searching...");
     setQueryLoading(true);
+    console.log("searching...");
     setErrorMessage("");
 
     fetch(
@@ -42,53 +66,156 @@ export default function ReviewModal({ show, onHide }) {
       .finally(setQueryLoading(false))
       .catch((error) => console.error(error));
   };
+
+  //when user presses 'Create Review' in GameFinder Modal
+  const handleCreateForm = () => {
+    if (!game) return;
+    setCreateForm(true);
+    setModalSize("lg");
+  };
+
+  const fetchThumbnail = async () => {
+    const response = await fetch(
+      `https://corsproxy.io/?https://store.steampowered.com/api/appdetails?appids=${game.id}&filters=&cc=MY&l=english`,
+    )
+      .then((data) => data.json())
+      .catch((error) => console.error(error));
+    return await response[game.id].data.header_image;
+  };
+
+  const handleCreateReview = async () => {
+    fetchThumbnail().then((image) => {
+      dispatch(
+        addReview({
+          name: game.name,
+          content: newContent,
+          playtime: newPlaytime,
+          rating: newRating,
+          created_at: new Date().toString().slice(0, 15),
+          thumbnail: image,
+        }),
+      );
+    });
+    handleOnHide();
+  };
+
   return (
-    <Modal show={show} onHide={handleOnHide} animation={false} centered>
+    <Modal
+      size={modalSize}
+      show={show}
+      onHide={handleOnHide}
+      animation={false}
+      centered
+    >
       <Modal.Header closeButton></Modal.Header>
       <Modal.Body className="d-grid gap-2">
-        <FormControl
-          required
-          type="text"
-          placeholder="Enter Game Name"
-          value={name}
-          onChange={(e) => setName(e.target.value)}
-        />
-        <Button onClick={handleQuery} className="rounded-pill btn-secondary">
-          Search
-        </Button>
-
-        {queryLoading && (
-          <div className="w-100 d-flex align-items-center justify-content-center">
-            <Spinner animation="border" variant="dark" />
-          </div>
-        )}
-        {errorMessage && <h1>{errorMessage}</h1>}
-        {game && (
+        {!createForm && (
           <>
-            <div className="create-card">
-              <div className="review-card text-white">
-                <div className="card-header-white">
-                  <h1>{game.name}</h1>
-                </div>
-                <div className="row w-100">
-                  <div className="col-sm-7">
-                    <img className="w-100" src={game.tiny_image} />
+            <FormControl
+              required
+              type="text"
+              placeholder="Enter Game Name"
+              value={name}
+              onChange={(e) => setName(e.target.value)}
+            />
+            <Button
+              onClick={handleQuery}
+              className="rounded-pill btn-secondary"
+            >
+              Search
+            </Button>
+
+            {queryLoading && (
+              <div className="w-100 d-flex align-items-center justify-content-center">
+                <Spinner animation="border" variant="dark" />
+              </div>
+            )}
+            {errorMessage && <h1>{errorMessage}</h1>}
+            {game && (
+              <>
+                <div className="create-card">
+                  <div className="review-card text-white">
+                    <div className="card-header-white">
+                      <h1>{game.name}</h1>
+                    </div>
+                    <div className="row w-100">
+                      <div className="col-sm-7">
+                        <img className="w-100" src={game.tiny_image} />
+                      </div>
+                      <div className="col-sm-1 d-flex align-items-center justify-content-center"></div>
+                    </div>
+                    <div className="card-footer-white">
+                      <div className="row">
+                        <div className="col-8"></div>
+                      </div>
+                    </div>
                   </div>
-                  <div className="col-sm-1 d-flex align-items-center justify-content-center"></div>
                 </div>
-                <div className="card-footer-white">
-                  <div className="row">
-                    <div className="col-8"></div>
+                <Button
+                  onClick={handleCreateForm}
+                  className="w-100 rounded-pill btn-danger"
+                >
+                  Create Review
+                </Button>
+              </>
+            )}
+          </>
+        )}
+        {createForm && (
+          <>
+            <div className="review-card text-white">
+              <div className="card-header-white">
+                <h1>{game.name}</h1>
+              </div>
+              <div className="row w-100">
+                <div className="col-sm-11">
+                  <FormControl
+                    required
+                    type="text"
+                    as="textarea"
+                    rows="6"
+                    value={newContent}
+                    onChange={(e) => setNewContent(e.target.value)}
+                    placeholder="Enter your review here"
+                  />
+                </div>
+                <div className="col-sm-1 d-flex align-items-center justify-content-center">
+                  <button
+                    onClick={handleCreateReview}
+                    className="btn btn-danger"
+                  >
+                    <i class="bi bi-check-square-fill"></i>
+                  </button>
+                </div>
+              </div>
+              <div className="card-footer-white pt-3">
+                <div className="row">
+                  <div className="col-6">
+                    <FormControl
+                      required
+                      type="number"
+                      placeholder="Enter your playtime"
+                      value={newPlaytime}
+                      onChange={(e) => setNewPlaytime(e.target.value)}
+                    />
+                  </div>
+                  <div className="col-6 align-self-center justify-self-center">
+                    {[1, 2, 3, 4, 5].map((num) => (
+                      <FormCheck
+                        inline
+                        key={num}
+                        type="radio"
+                        label={num.toString()}
+                        name="rating"
+                        value={num}
+                        checked={newRating === num}
+                        onChange={(e) => setNewRating(parseInt(e.target.value))}
+                      />
+                    ))}
                   </div>
                 </div>
               </div>
             </div>
-            <Button
-              onClick={handleQuery}
-              className="w-100 rounded-pill btn-danger"
-            >
-              Create Review
-            </Button>
           </>
         )}
       </Modal.Body>

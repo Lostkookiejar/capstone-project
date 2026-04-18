@@ -9,7 +9,7 @@ export const reviewSlice = createSlice({
   initialState,
   reducers: {
     addReview: (state, action) => {
-      state.value = [action.payload, ...state];
+      state.value = [action.payload, ...state.value];
     },
     /*
     editReview: (state, action) => {

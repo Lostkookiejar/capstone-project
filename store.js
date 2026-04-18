@@ -5,6 +5,6 @@ import reviewReducer from "./src/features/reviews/reviewSlice";
 export const store = configureStore({
   reducer: {
     counter: counterReducer,
-    review: reviewReducer,
+    reviews: reviewReducer,
   },
 });
