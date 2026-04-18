@@ -3,8 +3,8 @@ import { useContext, useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { AuthContext } from "../components/AuthProvider";
 import "./Dashboard.css";
-import { useSelector } from "react-redux";
-
+import { useDispatch, useSelector } from "react-redux";
+import { deleteReview } from "../features/reviews/reviewSlice";
 import { Button, Modal } from "react-bootstrap";
 import ReviewModal from "../components/ReviewModal";
 
@@ -52,6 +52,12 @@ function Dashboard() {
   const handleEditModal = (id) => {
     setShowModal("edit");
     setEditId(id);
+  };
+
+  //delete logic
+  const dispatch = useDispatch();
+  const handleDeleteReview = (id) => {
+    dispatch(deleteReview(id));
   };
 
   return (
@@ -107,7 +113,10 @@ function Dashboard() {
                     >
                       <i class="bi bi-pencil-square"></i>
                     </button>
-                    <button className="btn btn-danger">
+                    <button
+                      onClick={() => handleDeleteReview(review.created_at)}
+                      className="btn btn-danger"
+                    >
                       <i class="bi bi-trash3-fill"></i>
                     </button>
                   </div>

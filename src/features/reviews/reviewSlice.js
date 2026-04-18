@@ -27,6 +27,12 @@ export const reviewSlice = createSlice({
       });
       state.value = newStateValue;
     },
+    deleteReview: (state, action) => {
+      const newReviews = state.value.filter(
+        (review) => review.created_at !== action.payload,
+      );
+      state.value = newReviews;
+    },
     /*
     incrementByAmount: (state, action) => {
       state.value += action.payload;
@@ -34,6 +40,6 @@ export const reviewSlice = createSlice({
   },
 });
 
-export const { addReview, editReview } = reviewSlice.actions;
+export const { addReview, editReview, deleteReview } = reviewSlice.actions;
 
 export default reviewSlice.reducer;
