@@ -11,16 +11,29 @@ export const reviewSlice = createSlice({
     addReview: (state, action) => {
       state.value = [action.payload, ...state.value];
     },
-    /*
     editReview: (state, action) => {
-      state.value.map(())
+      const editId = action.payload.created_at;
+      const newStateValue = state.value.map((review) => {
+        if (review.created_at === editId) {
+          return {
+            name: review.name,
+            content: action.payload.content,
+            playtime: action.payload.playtime,
+            rating: action.payload.rating,
+            created_at: review.created_at,
+            thumbnail: review.thumbnail,
+          };
+        }
+      });
+      state.value = newStateValue;
     },
+    /*
     incrementByAmount: (state, action) => {
       state.value += action.payload;
     },*/
   },
 });
 
-export const { addReview } = reviewSlice.actions;
+export const { addReview, editReview } = reviewSlice.actions;
 
 export default reviewSlice.reducer;

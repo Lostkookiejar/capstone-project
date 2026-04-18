@@ -45,15 +45,20 @@ function Dashboard() {
   //modal visibility
   const [showModal, setShowModal] = useState(null);
   const handleCreateModal = () => setShowModal("create");
-  const handleEditModal = () => setShowModal("edit");
   const handleCloseModal = () => setShowModal(null);
-  const show = showModal !== null;
+
+  //edit logic
+  const [editId, setEditId] = useState(null);
+  const handleEditModal = (id) => {
+    setShowModal("edit");
+    setEditId(id);
+  };
 
   return (
     <div className="dashboard min-vh-100">
       <div className="container h-100 d-flex flex-column align-items-center justify-content-center ">
         <button
-          className="logout-button align-self-end btn btn-warning"
+          className="logout-button align-self-end btn btn-warning mt-2"
           onClick={handleLogout}
         >
           Logout
@@ -96,7 +101,10 @@ function Dashboard() {
                   </div>
                   <div className="col-sm-8">{review.content}</div>
                   <div className="col-sm-1 d-flex align-items-center justify-content-center">
-                    <button className="btn btn-danger m-1">
+                    <button
+                      onClick={() => handleEditModal(review.created_at)}
+                      className="btn btn-danger m-1"
+                    >
                       <i class="bi bi-pencil-square"></i>
                     </button>
                     <button className="btn btn-danger">
@@ -108,7 +116,7 @@ function Dashboard() {
                   <div className="row">
                     <div className="col-5">
                       <strong>Created: </strong>
-                      <small>{review.created_at}</small>
+                      <small>{review.created_at.slice(0, 15)}</small>
                     </div>
                     <div className="col-5">
                       <strong>Playtime: </strong>
@@ -121,7 +129,7 @@ function Dashboard() {
             ))}
         </div>
       </div>
-      <ReviewModal show={show} onHide={handleCloseModal} />
+      <ReviewModal show={showModal} onHide={handleCloseModal} editId={editId} />
     </div>
   );
 }

@@ -6,10 +6,10 @@ import {
   Modal,
   Spinner,
 } from "react-bootstrap";
-import { useDispatch } from "react-redux";
-import { addReview } from "../features/reviews/reviewSlice";
+import { useDispatch, useSelector } from "react-redux";
+import { addReview, editReview } from "../features/reviews/reviewSlice";
 
-export default function ReviewModal({ show, onHide }) {
+export default function ReviewModal({ show, onHide, editId }) {
   //redux
   const dispatch = useDispatch();
 
@@ -91,7 +91,7 @@ export default function ReviewModal({ show, onHide }) {
           content: newContent,
           playtime: newPlaytime,
           rating: newRating,
-          created_at: new Date().toString().slice(0, 15),
+          created_at: new Date().toString(),
           thumbnail: image,
         }),
       );
@@ -99,17 +99,42 @@ export default function ReviewModal({ show, onHide }) {
     handleOnHide();
   };
 
+  //edit modal logic
+  const reviews = useSelector((state) => state.reviews.value);
+  const [edit, setEdit] = useState({});
+  useEffect(() => {
+    if (show === "edit") {
+      const newEdit = reviews.filter((review) => review.created_at === editId);
+      setEdit(newEdit[0]);
+      setNewContent(edit.content);
+      setNewPlaytime(edit.playtime);
+      setNewRating(edit.rating);
+    }
+  }, [show, reviews, editId, edit]);
+
+  const handleEditReview = () => {
+    dispatch(
+      editReview({
+        content: newContent,
+        playtime: newPlaytime,
+        rating: newRating,
+        created_at: editId,
+      }),
+    );
+    handleOnHide();
+  };
+
   return (
     <Modal
       size={modalSize}
-      show={show}
+      show={show !== null}
       onHide={handleOnHide}
       animation={false}
       centered
     >
       <Modal.Header closeButton></Modal.Header>
       <Modal.Body className="d-grid gap-2">
-        {!createForm && (
+        {!createForm && show === "create" && (
           <>
             <FormControl
               required
@@ -184,6 +209,60 @@ export default function ReviewModal({ show, onHide }) {
                     onClick={handleCreateReview}
                     className="btn btn-danger"
                   >
+                    <i class="bi bi-check-square-fill"></i>
+                  </button>
+                </div>
+              </div>
+              <div className="card-footer-white pt-3">
+                <div className="row">
+                  <div className="col-6">
+                    <FormControl
+                      required
+                      type="number"
+                      placeholder="Enter your playtime"
+                      value={newPlaytime}
+                      onChange={(e) => setNewPlaytime(e.target.value)}
+                    />
+                  </div>
+                  <div className="col-6 align-self-center justify-self-center">
+                    {[1, 2, 3, 4, 5].map((num) => (
+                      <FormCheck
+                        inline
+                        key={num}
+                        type="radio"
+                        label={num.toString()}
+                        name="rating"
+                        value={num}
+                        checked={newRating === num}
+                        onChange={(e) => setNewRating(parseInt(e.target.value))}
+                      />
+                    ))}
+                  </div>
+                </div>
+              </div>
+            </div>
+          </>
+        )}
+        {show === "edit" && (
+          <>
+            <div className="review-card text-white">
+              <div className="card-header-white">
+                <h1>{edit.name}</h1>
+              </div>
+              <div className="row w-100">
+                <div className="col-sm-11">
+                  <FormControl
+                    required
+                    type="text"
+                    as="textarea"
+                    rows="6"
+                    value={newContent}
+                    onChange={(e) => setNewContent(e.target.value)}
+                    placeholder="Enter your review here"
+                  />
+                </div>
+                <div className="col-sm-1 d-flex align-items-center justify-content-center">
+                  <button onClick={handleEditReview} className="btn btn-danger">
                     <i class="bi bi-check-square-fill"></i>
                   </button>
                 </div>
