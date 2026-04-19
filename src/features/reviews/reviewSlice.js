@@ -2,7 +2,6 @@ import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
 import axios from "axios";
 
 const URL = "http://localhost:3000";
-
 export const fetchReviewsByUser = createAsyncThunk(
   "review/fetchByUser",
   async (userId) => {
@@ -30,9 +29,26 @@ export const createReview = createAsyncThunk(
     return {
       ...newReview,
       ...payload,
-      created_at:
-        payload?.created_at ?? payload?.createdAt ?? newReview.created_at,
+      created_at: payload?.created_at ?? newReview.created_at,
     };
+  },
+);
+
+export const updateReview = createAsyncThunk(
+  "reviews/updateReview",
+  async (newReview) => {
+    const data = {
+      thumbnail: newReview.thumbnail,
+      content: newReview.content,
+      playtime: newReview.playtime,
+      rating: newReview.rating,
+    };
+
+    const response = await axios.put(
+      `${URL}/update/review/${newReview.id}`,
+      data,
+    );
+    return response.data;
   },
 );
 const initialState = {
@@ -55,6 +71,24 @@ export const reviewSlice = createSlice({
         } else {
           state.value = [action.payload];
         }
+      }),
+      builder.addCase(updateReview.fulfilled, (state, action) => {
+        const newValue = state.value.map((review) => {
+          if (review.id === action.payload.id) {
+            return {
+              ...review, // Preserves id, name, created_at, user_id, etc.
+              thumbnail: action.payload.thumbnail,
+              content: action.payload.content,
+              rating: action.payload.rating,
+              playtime: action.payload.playtime,
+            };
+          }
+          return review;
+        });
+        state.value = [...newValue];
+      }),
+      builder.addCase(updateReview.rejected, (state, action) => {
+        console.error("UpdateReview failed:", action.error); // Handle failures
       }));
   },
 });

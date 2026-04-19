@@ -7,7 +7,7 @@ import {
   Spinner,
 } from "react-bootstrap";
 import { useDispatch, useSelector } from "react-redux";
-import { createReview, editReview } from "../features/reviews/reviewSlice";
+import { createReview, updateReview } from "../features/reviews/reviewSlice";
 
 export default function ReviewModal({ show, onHide, editId }) {
   //redux
@@ -25,6 +25,7 @@ export default function ReviewModal({ show, onHide, editId }) {
   const [newContent, setNewContent] = useState("");
   const [newPlaytime, setNewPlaytime] = useState("");
   const [newRating, setNewRating] = useState("");
+  const [newThumbnail, setNewThumbnail] = useState("");
 
   const handleOnHide = () => {
     onHide();
@@ -94,21 +95,25 @@ export default function ReviewModal({ show, onHide, editId }) {
   const [edit, setEdit] = useState({});
   useEffect(() => {
     if (show === "edit") {
-      const newEdit = reviews.filter((review) => review.created_at === editId);
-      setEdit(newEdit[0]);
-      setNewContent(edit.content);
-      setNewPlaytime(edit.playtime);
-      setNewRating(edit.rating);
+      const reviewToEdit = reviews.find((review) => review.id === editId);
+      if (reviewToEdit) {
+        setEdit(reviewToEdit);
+        setNewContent(reviewToEdit.content);
+        setNewThumbnail(reviewToEdit.thumbnail);
+        setNewPlaytime(reviewToEdit.playtime);
+        setNewRating(reviewToEdit.rating);
+      }
     }
-  }, [show, reviews, editId, edit]);
+  }, [show, reviews, editId]);
 
   const handleEditReview = () => {
     dispatch(
-      editReview({
+      updateReview({
+        thumbnail: newThumbnail,
         content: newContent,
         playtime: newPlaytime,
         rating: newRating,
-        created_at: editId,
+        id: editId,
       }),
     );
     handleOnHide();
@@ -217,6 +222,7 @@ export default function ReviewModal({ show, onHide, editId }) {
                   <div className="col-6 align-self-center justify-self-center">
                     {[1, 2, 3, 4, 5].map((num) => (
                       <FormCheck
+                        required
                         inline
                         key={num}
                         type="radio"
@@ -271,6 +277,7 @@ export default function ReviewModal({ show, onHide, editId }) {
                   <div className="col-6 align-self-center justify-self-center">
                     {[1, 2, 3, 4, 5].map((num) => (
                       <FormCheck
+                        required
                         inline
                         key={num}
                         type="radio"

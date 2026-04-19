@@ -100,7 +100,7 @@ function Dashboard() {
             <Spinner
               animation="border"
               className="ms-3 mt-3"
-              variant="primary"
+              variant="danger"
             />
           )}
           {!reviews[0] && !loading && (
@@ -116,7 +116,9 @@ function Dashboard() {
             reviews.map((review, index) => (
               <div key={index} className="review-card text-white">
                 <div className="card-header-white">
-                  <h1>{review.name}</h1>
+                  <h1>
+                    <strong>{review.name}</strong>
+                  </h1>
                 </div>
                 <div className="row w-100">
                   <div className="col-sm-3">
@@ -125,13 +127,13 @@ function Dashboard() {
                   <div className="col-sm-8">{review.content}</div>
                   <div className="col-sm-1 d-flex align-items-center justify-content-center">
                     <button
-                      onClick={() => handleEditModal(review.created_at)}
+                      onClick={() => handleEditModal(review.id)}
                       className="btn btn-danger m-1"
                     >
                       <i class="bi bi-pencil-square"></i>
                     </button>
                     <button
-                      onClick={() => handleDeleteReview(review.created_at)}
+                      onClick={() => handleDeleteReview(review.id)}
                       className="btn btn-danger"
                     >
                       <i class="bi bi-trash3-fill"></i>
