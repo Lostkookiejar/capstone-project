@@ -67,6 +67,7 @@ function Dashboard() {
 
   //delete logic
   const handleDeleteReview = (id) => {
+    console.log(id);
     dispatch(deleteReview(id));
   };
 

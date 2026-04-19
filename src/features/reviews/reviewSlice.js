@@ -51,6 +51,15 @@ export const updateReview = createAsyncThunk(
     return response.data;
   },
 );
+
+export const deleteReview = createAsyncThunk(
+  "reviews/deleteReview",
+  async (id) => {
+    const response = await axios.delete(`${URL}/delete/review/${id}`);
+    return response.data;
+  },
+);
+
 const initialState = {
   value: [],
   loading: true,
@@ -89,10 +98,17 @@ export const reviewSlice = createSlice({
       }),
       builder.addCase(updateReview.rejected, (state, action) => {
         console.error("UpdateReview failed:", action.error); // Handle failures
+      }),
+      builder.addCase(deleteReview.fulfilled, (state, action) => {
+        const newValue = state.value.filter(
+          (review) => action.payload.id !== review.id,
+        );
+        state.value = [...newValue];
+      }),
+      builder.addCase(deleteReview.rejected, (state, action) => {
+        console.error("DeleteReview failed:", action.error);
       }));
   },
 });
-
-export const { addReview, editReview, deleteReview } = reviewSlice.actions;
 
 export default reviewSlice.reducer;
