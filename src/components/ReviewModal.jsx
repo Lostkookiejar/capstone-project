@@ -7,7 +7,7 @@ import {
   Spinner,
 } from "react-bootstrap";
 import { useDispatch, useSelector } from "react-redux";
-import { addReview, editReview } from "../features/reviews/reviewSlice";
+import { createReview, editReview } from "../features/reviews/reviewSlice";
 
 export default function ReviewModal({ show, onHide, editId }) {
   //redux
@@ -74,28 +74,18 @@ export default function ReviewModal({ show, onHide, editId }) {
     setModalSize("lg");
   };
 
-  const fetchThumbnail = async () => {
-    const response = await fetch(
-      `https://corsproxy.io/?https://store.steampowered.com/api/appdetails?appids=${game.id}&filters=&cc=MY&l=english`,
-    )
-      .then((data) => data.json())
-      .catch((error) => console.error(error));
-    return await response[game.id].data.header_image;
-  };
+  const handleCreateReview = () => {
+    dispatch(
+      createReview({
+        name: game.name,
+        content: newContent,
+        playtime: newPlaytime,
+        rating: newRating,
+        created_at: new Date().toString(),
+        thumbnail: game.tiny_image,
+      }),
+    );
 
-  const handleCreateReview = async () => {
-    fetchThumbnail().then((image) => {
-      dispatch(
-        addReview({
-          name: game.name,
-          content: newContent,
-          playtime: newPlaytime,
-          rating: newRating,
-          created_at: new Date().toString(),
-          thumbnail: image,
-        }),
-      );
-    });
     handleOnHide();
   };
 

@@ -1,42 +1,61 @@
-import { createSlice } from "@reduxjs/toolkit";
+import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
+import axios from "axios";
 
+const URL = "http://localhost:3000";
+
+export const fetchReviewsByUser = createAsyncThunk(
+  "review/fetchByUser",
+  async (userId) => {
+    const response = await fetch(`${URL}/reviews/user/${userId}`);
+    return await response.json();
+  },
+);
+
+export const createReview = createAsyncThunk(
+  "reviews/createReview",
+  async (newReview) => {
+    const uid = localStorage.getItem("user_id");
+
+    const data = {
+      name: newReview.name,
+      thumbnail: newReview.thumbnail,
+      content: newReview.content,
+      created_at: newReview.created_at,
+      rating: newReview.rating,
+      playtime: newReview.playtime,
+    };
+
+    const response = await axios.post(`${URL}/create/review/${uid}`, data);
+    const payload = response.data;
+    return {
+      ...newReview,
+      ...payload,
+      created_at:
+        payload?.created_at ?? payload?.createdAt ?? newReview.created_at,
+    };
+  },
+);
 const initialState = {
   value: [],
+  loading: true,
 };
 
 export const reviewSlice = createSlice({
-  name: "review",
+  name: "reviews",
   initialState,
-  reducers: {
-    addReview: (state, action) => {
-      state.value = [action.payload, ...state.value];
-    },
-    editReview: (state, action) => {
-      const editId = action.payload.created_at;
-      const newStateValue = state.value.map((review) => {
-        if (review.created_at === editId) {
-          return {
-            name: review.name,
-            content: action.payload.content,
-            playtime: action.payload.playtime,
-            rating: action.payload.rating,
-            created_at: review.created_at,
-            thumbnail: review.thumbnail,
-          };
+  reducers: {},
+  extraReducers: (builder) => {
+    (builder.addCase(fetchReviewsByUser.fulfilled, (state, action) => {
+      state.value = action.payload;
+      state.loading = false;
+    }),
+      builder.addCase(createReview.fulfilled, (state, action) => {
+        if (state.value[0]) {
+          state.value = [action.payload, ...state.value];
+        } else {
+          state.value = [action.payload];
         }
-      });
-      state.value = newStateValue;
-    },
-    deleteReview: (state, action) => {
-      const newReviews = state.value.filter(
-        (review) => review.created_at !== action.payload,
-      );
-      state.value = newReviews;
-    },
-    /*
-    incrementByAmount: (state, action) => {
-      state.value += action.payload;
-    },*/
+      }));
   },
 });
 
