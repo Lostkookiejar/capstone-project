@@ -29,12 +29,15 @@ function LoginPage() {
   const handleSignUp = async (e) => {
     e.preventDefault();
     try {
-      const res = await createUserWithEmailAndPassword(
+      const userCredential = await createUserWithEmailAndPassword(
         auth,
         username,
         password,
       );
-      console.log(res.user);
+      const user = userCredential.user;
+
+      console.log(user.uid);
+      localStorage.setItem("user_id", user.uid);
     } catch (error) {
       console.error(error);
     }
@@ -43,7 +46,15 @@ function LoginPage() {
   const handleLogin = async (e) => {
     e.preventDefault();
     try {
-      await signInWithEmailAndPassword(auth, username, password);
+      const userCredential = await signInWithEmailAndPassword(
+        auth,
+        username,
+        password,
+      );
+      const user = userCredential.user;
+
+      console.log(user.uid);
+      localStorage.setItem("user_id", user.uid);
     } catch (error) {
       console.error(error);
     }
@@ -54,7 +65,11 @@ function LoginPage() {
   const handleGoogleLogin = async (e) => {
     e.preventDefault();
     try {
-      await signInWithPopup(auth, provider);
+      const userCredential = await signInWithPopup(auth, provider);
+      const user = userCredential.user;
+
+      console.log(user.uid);
+      localStorage.setItem("user_id", user.uid);
     } catch (error) {
       console.error(error);
     }
