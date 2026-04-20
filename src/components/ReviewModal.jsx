@@ -13,7 +13,7 @@ import { createReview, updateReview } from "../features/reviews/reviewSlice";
 export default function ReviewModal({ show, onHide, editId }) {
   //redux
   const dispatch = useDispatch();
-
+  const url = "http://localhost:3000";
   //input field state
   const [modalSize, setModalSize] = useState("");
   const [name, setName] = useState("");
@@ -21,6 +21,7 @@ export default function ReviewModal({ show, onHide, editId }) {
   const [game, setGame] = useState(null);
   const [queryLoading, setQueryLoading] = useState(false);
   const [createForm, setCreateForm] = useState(false);
+  const [fetchingGenAi, setFetchingGenAi] = useState(false);
 
   //input field state after game is set
   const [newContent, setNewContent] = useState("");
@@ -89,10 +90,22 @@ export default function ReviewModal({ show, onHide, editId }) {
   };
 
   //when user presses 'Create Review' in GameFinder Modal
-  const handleCreateForm = () => {
+  const handleCreateForm = async (gameName) => {
     if (!game) return;
-    setCreateForm(true);
     setModalSize("lg");
+    setFetchingGenAi(true);
+
+    try {
+      const data = await fetch(`${url}/generate/review/${gameName}`);
+      const response = await data.json();
+      if (response.review) {
+        setNewContent(response.review);
+      }
+    } catch {
+      console.error("Error: ", error.message);
+    }
+    setFetchingGenAi(false);
+    setCreateForm(true);
   };
 
   const handleCreateReview = () => {
@@ -156,7 +169,7 @@ export default function ReviewModal({ show, onHide, editId }) {
     >
       <Modal.Header closeButton></Modal.Header>
       <Modal.Body className="d-grid gap-2">
-        {!createForm && show === "create" && (
+        {!fetchingGenAi && !createForm && show === "create" && (
           <>
             <FormControl
               required
@@ -174,7 +187,7 @@ export default function ReviewModal({ show, onHide, editId }) {
 
             {queryLoading && (
               <div className="w-100 d-flex align-items-center justify-content-center">
-                <Spinner animation="border" variant="dark" />
+                <Spinner animation="border" variant="danger" />
               </div>
             )}
             {errorMessage && <small>{errorMessage}</small>}
@@ -199,7 +212,7 @@ export default function ReviewModal({ show, onHide, editId }) {
                   </div>
                 </div>
                 <Button
-                  onClick={handleCreateForm}
+                  onClick={() => handleCreateForm(game.name)}
                   className="w-100 rounded-pill btn-danger"
                 >
                   Create Review
@@ -208,7 +221,12 @@ export default function ReviewModal({ show, onHide, editId }) {
             )}
           </>
         )}
-        {createForm && (
+        {fetchingGenAi && (
+          <div className="w-100 d-flex align-items-center justify-content-center">
+            <Spinner animation="border" variant="danger" role="status" />
+          </div>
+        )}
+        {!fetchingGenAi && createForm && (
           <>
             <div className="review-card text-white">
               <div className="card-header-white">
@@ -222,7 +240,7 @@ export default function ReviewModal({ show, onHide, editId }) {
                     required
                     type="text"
                     as="textarea"
-                    rows="6"
+                    rows="10"
                     value={newContent}
                     onChange={(e) => setNewContent(e.target.value)}
                     placeholder="Enter your review here"

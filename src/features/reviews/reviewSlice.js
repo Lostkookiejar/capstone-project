@@ -106,6 +106,8 @@ export const deleteReview = createAsyncThunk(
 const initialState = {
   value: [],
   loading: true,
+  loadingGenAi: false,
+  genAiReview: "",
 };
 
 export const reviewSlice = createSlice({

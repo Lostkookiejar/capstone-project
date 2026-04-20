@@ -98,11 +98,9 @@ function Dashboard() {
             <strong>Your Reviews</strong>
           </h1>
           {loading && (
-            <Spinner
-              animation="border"
-              className="ms-3 mt-3"
-              variant="danger"
-            />
+            <div className="w-100 d-flex align-items-center justify-content-center">
+              <Spinner animation="border" variant="danger" role="status" />
+            </div>
           )}
           {!reviews[0] && !loading && (
             <button
