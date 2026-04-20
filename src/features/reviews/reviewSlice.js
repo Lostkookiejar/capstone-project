@@ -1,6 +1,7 @@
 import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
 import axios from "axios";
-
+import { storage } from "../../../firebase";
+import { getDownloadURL, ref, uploadBytes } from "firebase/storage";
 const URL = "http://localhost:3000";
 export const fetchReviewsByUser = createAsyncThunk(
   "review/fetchByUser",
@@ -15,40 +16,82 @@ export const createReview = createAsyncThunk(
   async (newReview) => {
     const uid = localStorage.getItem("user_id");
 
-    const data = {
-      name: newReview.name,
-      thumbnail: newReview.thumbnail,
-      content: newReview.content,
-      created_at: newReview.created_at,
-      rating: newReview.rating,
-      playtime: newReview.playtime,
-    };
+    if (newReview.upload) {
+      const { upload } = newReview;
+      const imageRef = ref(storage, `reviews/${upload.name}`);
+      const imageResponse = await uploadBytes(imageRef, upload);
+      const imageUrl = await getDownloadURL(imageResponse.ref);
 
-    const response = await axios.post(`${URL}/create/review/${uid}`, data);
-    const payload = response.data;
-    return {
-      ...newReview,
-      ...payload,
-      created_at: payload?.created_at ?? newReview.created_at,
-    };
+      const data = {
+        name: newReview.name,
+        thumbnail: imageUrl,
+        content: newReview.content,
+        created_at: newReview.created_at,
+        rating: newReview.rating,
+        playtime: newReview.playtime,
+      };
+
+      const response = await axios.post(`${URL}/create/review/${uid}`, data);
+      const payload = response.data;
+      return {
+        ...newReview,
+        ...payload,
+        created_at: payload?.created_at ?? newReview.created_at,
+      };
+    } else {
+      const data = {
+        name: newReview.name,
+        thumbnail: newReview.thumbnail,
+        content: newReview.content,
+        created_at: newReview.created_at,
+        rating: newReview.rating,
+        playtime: newReview.playtime,
+      };
+
+      const response = await axios.post(`${URL}/create/review/${uid}`, data);
+      const payload = response.data;
+      return {
+        ...payload,
+        created_at: payload?.created_at ?? newReview.created_at,
+      };
+    }
   },
 );
 
 export const updateReview = createAsyncThunk(
   "reviews/updateReview",
   async (newReview) => {
-    const data = {
-      thumbnail: newReview.thumbnail,
-      content: newReview.content,
-      playtime: newReview.playtime,
-      rating: newReview.rating,
-    };
+    if (newReview.upload) {
+      const { upload } = newReview;
+      const imageRef = ref(storage, `reviews/${upload.name}`);
+      const imageResponse = await uploadBytes(imageRef, upload);
+      const imageUrl = await getDownloadURL(imageResponse.ref);
 
-    const response = await axios.put(
-      `${URL}/update/review/${newReview.id}`,
-      data,
-    );
-    return response.data;
+      const data = {
+        thumbnail: imageUrl,
+        content: newReview.content,
+        rating: newReview.rating,
+        playtime: newReview.playtime,
+      };
+      const response = await axios.put(
+        `${URL}/update/review/${newReview.id}`,
+        data,
+      );
+      return response.data;
+    } else {
+      const data = {
+        thumbnail: newReview.thumbnail,
+        content: newReview.content,
+        playtime: newReview.playtime,
+        rating: newReview.rating,
+      };
+
+      const response = await axios.put(
+        `${URL}/update/review/${newReview.id}`,
+        data,
+      );
+      return response.data;
+    }
   },
 );
 
@@ -77,9 +120,14 @@ export const reviewSlice = createSlice({
       builder.addCase(createReview.fulfilled, (state, action) => {
         if (state.value[0]) {
           state.value = [action.payload, ...state.value];
+          state.loading = false;
         } else {
           state.value = [action.payload];
+          state.loading = false;
         }
+      }),
+      builder.addCase(createReview.pending, (state) => {
+        state.loading = true;
       }),
       builder.addCase(updateReview.fulfilled, (state, action) => {
         const newValue = state.value.map((review) => {

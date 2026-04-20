@@ -1,10 +1,11 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import {
   Button,
   FormCheck,
   FormControl,
   Modal,
   Spinner,
+  Form,
 } from "react-bootstrap";
 import { useDispatch, useSelector } from "react-redux";
 import { createReview, updateReview } from "../features/reviews/reviewSlice";
@@ -26,16 +27,32 @@ export default function ReviewModal({ show, onHide, editId }) {
   const [newPlaytime, setNewPlaytime] = useState("");
   const [newRating, setNewRating] = useState("");
   const [newThumbnail, setNewThumbnail] = useState("");
+  const [error, setError] = useState("");
+  const [newFile, setNewFile] = useState(null);
+  const fileInputRef = useRef(null);
+  const handleResetFileInput = () => {
+    if (fileInputRef.current) {
+      fileInputRef.current.value = "";
+      setNewFile(null);
+    }
+  };
+  const handleFileChange = (e) => {
+    setNewFile(e.target.files[0]);
+  };
 
   const handleOnHide = () => {
     onHide();
     setName("");
+    setGame(null);
     setQueryLoading(false);
+    setErrorMessage("");
     setCreateForm(false);
     setModalSize("");
     setNewContent("");
     setNewPlaytime("");
     setNewRating("");
+    setNewFile(null);
+    setError("");
   };
 
   //clears game if user deletes search query
@@ -47,7 +64,10 @@ export default function ReviewModal({ show, onHide, editId }) {
 
   //on user query
   const handleQuery = () => {
-    if (game) return;
+    if (!name) {
+      setErrorMessage("Please enter a game");
+      return;
+    }
     setQueryLoading(true);
     console.log("searching...");
     setErrorMessage("");
@@ -76,6 +96,11 @@ export default function ReviewModal({ show, onHide, editId }) {
   };
 
   const handleCreateReview = () => {
+    if (newFile && !newFile.type.includes("image")) {
+      setError("Please upload an image");
+      return;
+    }
+
     dispatch(
       createReview({
         name: game.name,
@@ -84,9 +109,9 @@ export default function ReviewModal({ show, onHide, editId }) {
         rating: newRating,
         created_at: new Date().toString(),
         thumbnail: game.tiny_image,
+        upload: newFile ? newFile : null,
       }),
     );
-
     handleOnHide();
   };
 
@@ -95,6 +120,7 @@ export default function ReviewModal({ show, onHide, editId }) {
   const [edit, setEdit] = useState({});
   useEffect(() => {
     if (show === "edit") {
+      setModalSize("lg");
       const reviewToEdit = reviews.find((review) => review.id === editId);
       if (reviewToEdit) {
         setEdit(reviewToEdit);
@@ -114,6 +140,7 @@ export default function ReviewModal({ show, onHide, editId }) {
         playtime: newPlaytime,
         rating: newRating,
         id: editId,
+        upload: newFile ? newFile : null,
       }),
     );
     handleOnHide();
@@ -150,7 +177,7 @@ export default function ReviewModal({ show, onHide, editId }) {
                 <Spinner animation="border" variant="dark" />
               </div>
             )}
-            {errorMessage && <h1>{errorMessage}</h1>}
+            {errorMessage && <small>{errorMessage}</small>}
             {game && (
               <>
                 <div className="create-card">
@@ -185,7 +212,9 @@ export default function ReviewModal({ show, onHide, editId }) {
           <>
             <div className="review-card text-white">
               <div className="card-header-white">
-                <h1>{game.name}</h1>
+                <h1>
+                  <strong>{game.name}</strong>
+                </h1>
               </div>
               <div className="row w-100">
                 <div className="col-sm-11">
@@ -236,6 +265,26 @@ export default function ReviewModal({ show, onHide, editId }) {
                   </div>
                 </div>
               </div>
+              <label className="my-1">{"Upload an image (optional)"}</label>
+              <div className="row w-100">
+                <div className="col-11">
+                  <FormControl
+                    type="file"
+                    ref={fileInputRef}
+                    onChange={handleFileChange}
+                  />
+                </div>
+                <div className="col-1">
+                  <button
+                    className="btn btn-danger"
+                    onClick={handleResetFileInput}
+                  >
+                    <i className="bi bi-x-square-fill"></i>
+                  </button>
+                </div>
+              </div>
+
+              <small>{error && error}</small>
             </div>
           </>
         )}
@@ -291,6 +340,26 @@ export default function ReviewModal({ show, onHide, editId }) {
                   </div>
                 </div>
               </div>
+              <label className="my-1">{"Upload an image (optional)"}</label>
+              <div className="row w-100">
+                <div className="col-11">
+                  <FormControl
+                    type="file"
+                    ref={fileInputRef}
+                    onChange={handleFileChange}
+                  />
+                </div>
+                <div className="col-1">
+                  <button
+                    className="btn btn-danger"
+                    onClick={handleResetFileInput}
+                  >
+                    <i className="bi bi-x-square-fill"></i>
+                  </button>
+                </div>
+              </div>
+
+              <small>{error && error}</small>
             </div>
           </>
         )}
