@@ -1,6 +1,6 @@
 .login-page {
   position: relative;
-  background-image: url("./red-background.jpg");
+  background: #c30101;
   background-size: cover;
   background-position: center;
   background-repeat: no-repeat;
