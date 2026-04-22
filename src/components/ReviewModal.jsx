@@ -1,18 +1,22 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import {
   Button,
   FormCheck,
   FormControl,
   Modal,
   Spinner,
+  Form,
 } from "react-bootstrap";
 import { useDispatch, useSelector } from "react-redux";
-import { addReview, editReview } from "../features/reviews/reviewSlice";
+import {
+  URL,
+  createReview,
+  updateReview,
+} from "../features/reviews/reviewSlice";
 
 export default function ReviewModal({ show, onHide, editId }) {
   //redux
   const dispatch = useDispatch();
-
   //input field state
   const [modalSize, setModalSize] = useState("");
   const [name, setName] = useState("");
@@ -20,21 +24,39 @@ export default function ReviewModal({ show, onHide, editId }) {
   const [game, setGame] = useState(null);
   const [queryLoading, setQueryLoading] = useState(false);
   const [createForm, setCreateForm] = useState(false);
+  const [fetchingGenAi, setFetchingGenAi] = useState(false);
 
   //input field state after game is set
   const [newContent, setNewContent] = useState("");
   const [newPlaytime, setNewPlaytime] = useState("");
   const [newRating, setNewRating] = useState("");
+  const [newThumbnail, setNewThumbnail] = useState("");
+  const [error, setError] = useState("");
+  const [newFile, setNewFile] = useState(null);
+  const fileInputRef = useRef(null);
+  const handleResetFileInput = () => {
+    if (fileInputRef.current) {
+      fileInputRef.current.value = "";
+      setNewFile(null);
+    }
+  };
+  const handleFileChange = (e) => {
+    setNewFile(e.target.files[0]);
+  };
 
   const handleOnHide = () => {
     onHide();
     setName("");
+    setGame(null);
     setQueryLoading(false);
+    setErrorMessage("");
     setCreateForm(false);
     setModalSize("");
     setNewContent("");
     setNewPlaytime("");
     setNewRating("");
+    setNewFile(null);
+    setError("");
   };
 
   //clears game if user deletes search query
@@ -46,7 +68,10 @@ export default function ReviewModal({ show, onHide, editId }) {
 
   //on user query
   const handleQuery = () => {
-    if (game) return;
+    if (!name) {
+      setErrorMessage("Please enter a game");
+      return;
+    }
     setQueryLoading(true);
     console.log("searching...");
     setErrorMessage("");
@@ -68,34 +93,41 @@ export default function ReviewModal({ show, onHide, editId }) {
   };
 
   //when user presses 'Create Review' in GameFinder Modal
-  const handleCreateForm = () => {
+  const handleCreateForm = async (gameName) => {
     if (!game) return;
-    setCreateForm(true);
     setModalSize("lg");
+    setFetchingGenAi(true);
+
+    try {
+      const data = await fetch(`${URL}/generate/review/${gameName}`);
+      const response = await data.json();
+      if (response.review) {
+        setNewContent(response.review);
+      }
+    } catch {
+      console.error("Error: ", error.message);
+    }
+    setFetchingGenAi(false);
+    setCreateForm(true);
   };
 
-  const fetchThumbnail = async () => {
-    const response = await fetch(
-      `https://corsproxy.io/?https://store.steampowered.com/api/appdetails?appids=${game.id}&filters=&cc=MY&l=english`,
-    )
-      .then((data) => data.json())
-      .catch((error) => console.error(error));
-    return await response[game.id].data.header_image;
-  };
+  const handleCreateReview = () => {
+    if (newFile && !newFile.type.includes("image")) {
+      setError("Please upload an image");
+      return;
+    }
 
-  const handleCreateReview = async () => {
-    fetchThumbnail().then((image) => {
-      dispatch(
-        addReview({
-          name: game.name,
-          content: newContent,
-          playtime: newPlaytime,
-          rating: newRating,
-          created_at: new Date().toString(),
-          thumbnail: image,
-        }),
-      );
-    });
+    dispatch(
+      createReview({
+        name: game.name,
+        content: newContent,
+        playtime: newPlaytime,
+        rating: newRating,
+        created_at: new Date().toString(),
+        thumbnail: game.tiny_image,
+        upload: newFile ? newFile : null,
+      }),
+    );
     handleOnHide();
   };
 
@@ -104,21 +136,27 @@ export default function ReviewModal({ show, onHide, editId }) {
   const [edit, setEdit] = useState({});
   useEffect(() => {
     if (show === "edit") {
-      const newEdit = reviews.filter((review) => review.created_at === editId);
-      setEdit(newEdit[0]);
-      setNewContent(edit.content);
-      setNewPlaytime(edit.playtime);
-      setNewRating(edit.rating);
+      setModalSize("lg");
+      const reviewToEdit = reviews.find((review) => review.id === editId);
+      if (reviewToEdit) {
+        setEdit(reviewToEdit);
+        setNewContent(reviewToEdit.content);
+        setNewThumbnail(reviewToEdit.thumbnail);
+        setNewPlaytime(reviewToEdit.playtime);
+        setNewRating(reviewToEdit.rating);
+      }
     }
-  }, [show, reviews, editId, edit]);
+  }, [show, reviews, editId]);
 
   const handleEditReview = () => {
     dispatch(
-      editReview({
+      updateReview({
+        thumbnail: newThumbnail,
         content: newContent,
         playtime: newPlaytime,
         rating: newRating,
-        created_at: editId,
+        id: editId,
+        upload: newFile ? newFile : null,
       }),
     );
     handleOnHide();
@@ -134,7 +172,7 @@ export default function ReviewModal({ show, onHide, editId }) {
     >
       <Modal.Header closeButton></Modal.Header>
       <Modal.Body className="d-grid gap-2">
-        {!createForm && show === "create" && (
+        {!fetchingGenAi && !createForm && show === "create" && (
           <>
             <FormControl
               required
@@ -152,10 +190,10 @@ export default function ReviewModal({ show, onHide, editId }) {
 
             {queryLoading && (
               <div className="w-100 d-flex align-items-center justify-content-center">
-                <Spinner animation="border" variant="dark" />
+                <Spinner animation="border" variant="danger" />
               </div>
             )}
-            {errorMessage && <h1>{errorMessage}</h1>}
+            {errorMessage && <small>{errorMessage}</small>}
             {game && (
               <>
                 <div className="create-card">
@@ -177,7 +215,7 @@ export default function ReviewModal({ show, onHide, editId }) {
                   </div>
                 </div>
                 <Button
-                  onClick={handleCreateForm}
+                  onClick={() => handleCreateForm(game.name)}
                   className="w-100 rounded-pill btn-danger"
                 >
                   Create Review
@@ -186,11 +224,18 @@ export default function ReviewModal({ show, onHide, editId }) {
             )}
           </>
         )}
-        {createForm && (
+        {fetchingGenAi && (
+          <div className="w-100 d-flex align-items-center justify-content-center">
+            <Spinner animation="border" variant="danger" role="status" />
+          </div>
+        )}
+        {!fetchingGenAi && createForm && (
           <>
             <div className="review-card text-white">
               <div className="card-header-white">
-                <h1>{game.name}</h1>
+                <h1>
+                  <strong>{game.name}</strong>
+                </h1>
               </div>
               <div className="row w-100">
                 <div className="col-sm-11">
@@ -198,7 +243,7 @@ export default function ReviewModal({ show, onHide, editId }) {
                     required
                     type="text"
                     as="textarea"
-                    rows="6"
+                    rows="10"
                     value={newContent}
                     onChange={(e) => setNewContent(e.target.value)}
                     placeholder="Enter your review here"
@@ -227,6 +272,7 @@ export default function ReviewModal({ show, onHide, editId }) {
                   <div className="col-6 align-self-center justify-self-center">
                     {[1, 2, 3, 4, 5].map((num) => (
                       <FormCheck
+                        required
                         inline
                         key={num}
                         type="radio"
@@ -240,6 +286,26 @@ export default function ReviewModal({ show, onHide, editId }) {
                   </div>
                 </div>
               </div>
+              <label className="my-1">{"Upload an image (optional)"}</label>
+              <div className="row w-100">
+                <div className="col-11">
+                  <FormControl
+                    type="file"
+                    ref={fileInputRef}
+                    onChange={handleFileChange}
+                  />
+                </div>
+                <div className="col-1">
+                  <button
+                    className="btn btn-danger"
+                    onClick={handleResetFileInput}
+                  >
+                    <i className="bi bi-x-square-fill"></i>
+                  </button>
+                </div>
+              </div>
+
+              <small>{error && error}</small>
             </div>
           </>
         )}
@@ -281,6 +347,7 @@ export default function ReviewModal({ show, onHide, editId }) {
                   <div className="col-6 align-self-center justify-self-center">
                     {[1, 2, 3, 4, 5].map((num) => (
                       <FormCheck
+                        required
                         inline
                         key={num}
                         type="radio"
@@ -294,6 +361,26 @@ export default function ReviewModal({ show, onHide, editId }) {
                   </div>
                 </div>
               </div>
+              <label className="my-1">{"Upload an image (optional)"}</label>
+              <div className="row w-100">
+                <div className="col-11">
+                  <FormControl
+                    type="file"
+                    ref={fileInputRef}
+                    onChange={handleFileChange}
+                  />
+                </div>
+                <div className="col-1">
+                  <button
+                    className="btn btn-danger"
+                    onClick={handleResetFileInput}
+                  >
+                    <i className="bi bi-x-square-fill"></i>
+                  </button>
+                </div>
+              </div>
+
+              <small>{error && error}</small>
             </div>
           </>
         )}

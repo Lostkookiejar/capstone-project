@@ -4,8 +4,11 @@ import { useNavigate } from "react-router-dom";
 import { AuthContext } from "../components/AuthProvider";
 import "./Dashboard.css";
 import { useDispatch, useSelector } from "react-redux";
-import { deleteReview } from "../features/reviews/reviewSlice";
-import { Button, Modal } from "react-bootstrap";
+import {
+  deleteReview,
+  fetchReviewsByUser,
+} from "../features/reviews/reviewSlice";
+import { Button, Modal, Spinner } from "react-bootstrap";
 import ReviewModal from "../components/ReviewModal";
 
 function Dashboard() {
@@ -41,6 +44,14 @@ function Dashboard() {
   //react-redux, global state
   //const reviews = [];
   const reviews = useSelector((state) => state.reviews.value);
+  const loading = useSelector((state) => state.reviews.loading);
+  const dispatch = useDispatch();
+
+  //fetch reviews by user on page mount
+  useEffect(() => {
+    const uid = localStorage.getItem("user_id");
+    dispatch(fetchReviewsByUser(uid));
+  }, [dispatch]);
 
   //modal visibility
   const [showModal, setShowModal] = useState(null);
@@ -55,8 +66,8 @@ function Dashboard() {
   };
 
   //delete logic
-  const dispatch = useDispatch();
   const handleDeleteReview = (id) => {
+    console.log(id);
     dispatch(deleteReview(id));
   };
 
@@ -86,7 +97,12 @@ function Dashboard() {
           <h1 className="card-header pb-2">
             <strong>Your Reviews</strong>
           </h1>
-          {!reviews[0] && (
+          {loading && (
+            <div className="w-100 d-flex align-items-center justify-content-center">
+              <Spinner animation="border" variant="danger" role="status" />
+            </div>
+          )}
+          {!reviews[0] && !loading && (
             <button
               type="button"
               className="btn btn-link text-decoration-none text-secondary"
@@ -99,7 +115,9 @@ function Dashboard() {
             reviews.map((review, index) => (
               <div key={index} className="review-card text-white">
                 <div className="card-header-white">
-                  <h1>{review.name}</h1>
+                  <h1>
+                    <strong>{review.name}</strong>
+                  </h1>
                 </div>
                 <div className="row w-100">
                   <div className="col-sm-3">
@@ -108,13 +126,13 @@ function Dashboard() {
                   <div className="col-sm-8">{review.content}</div>
                   <div className="col-sm-1 d-flex align-items-center justify-content-center">
                     <button
-                      onClick={() => handleEditModal(review.created_at)}
+                      onClick={() => handleEditModal(review.id)}
                       className="btn btn-danger m-1"
                     >
                       <i class="bi bi-pencil-square"></i>
                     </button>
                     <button
-                      onClick={() => handleDeleteReview(review.created_at)}
+                      onClick={() => handleDeleteReview(review.id)}
                       className="btn btn-danger"
                     >
                       <i class="bi bi-trash3-fill"></i>
@@ -125,7 +143,9 @@ function Dashboard() {
                   <div className="row">
                     <div className="col-5">
                       <strong>Created: </strong>
-                      <small>{review.created_at.slice(0, 15)}</small>
+                      <small>
+                        {review.created_at?.slice(0, 15) || "Undisclosed date"}
+                      </small>
                     </div>
                     <div className="col-5">
                       <strong>Playtime: </strong>
