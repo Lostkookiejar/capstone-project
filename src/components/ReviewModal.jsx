@@ -77,7 +77,7 @@ export default function ReviewModal({ show, onHide, editId }) {
     setErrorMessage("");
 
     const corsApiKey = import.meta.env.VITE_CORS_API_KEY;
-    const url = `https://corsproxy.io/?key=${corsApiKey}e&url=${encodeURIComponent(`https://store.steampowered.com/api/storesearch/?term=${name}&cc=US&l=en`)}`;
+    const url = `https://corsproxy.io/?key=${corsApiKey}&url=${encodeURIComponent(`https://store.steampowered.com/api/storesearch/?term=${name}&cc=US&l=en`)}`;
     fetch(url)
       .then((data) => data.json())
       .then((response) => {
