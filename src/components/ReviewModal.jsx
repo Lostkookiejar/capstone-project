@@ -77,7 +77,7 @@ export default function ReviewModal({ show, onHide, editId }) {
     setErrorMessage("");
 
     fetch(
-      `https://corsproxy.io/?https://store.steampowered.com/api/storesearch/?term=${encodeURIComponent(name)}&cc=US&l=en`,
+      `https://store.steampowered.com/api/storesearch/?term=${encodeURIComponent(name)}&cc=US&l=en`,
     )
       .then((data) => data.json())
       .then((response) => {
