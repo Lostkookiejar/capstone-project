@@ -8,12 +8,15 @@ import {
   Form,
 } from "react-bootstrap";
 import { useDispatch, useSelector } from "react-redux";
-import { createReview, updateReview } from "../features/reviews/reviewSlice";
+import {
+  URL,
+  createReview,
+  updateReview,
+} from "../features/reviews/reviewSlice";
 
 export default function ReviewModal({ show, onHide, editId }) {
   //redux
   const dispatch = useDispatch();
-  const url = "http://localhost:3000";
   //input field state
   const [modalSize, setModalSize] = useState("");
   const [name, setName] = useState("");
@@ -96,7 +99,7 @@ export default function ReviewModal({ show, onHide, editId }) {
     setFetchingGenAi(true);
 
     try {
-      const data = await fetch(`${url}/generate/review/${gameName}`);
+      const data = await fetch(`${URL}/generate/review/${gameName}`);
       const response = await data.json();
       if (response.review) {
         setNewContent(response.review);

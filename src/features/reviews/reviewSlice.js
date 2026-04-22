@@ -2,7 +2,7 @@ import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
 import axios from "axios";
 import { storage } from "../../../firebase";
 import { getDownloadURL, ref, uploadBytes } from "firebase/storage";
-const URL = "http://localhost:3000";
+export const URL = "http://localhost:3000";
 export const fetchReviewsByUser = createAsyncThunk(
   "review/fetchByUser",
   async (userId) => {
