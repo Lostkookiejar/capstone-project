@@ -1,4 +1,5 @@
 import LoginPage from "./pages/LoginPage.jsx";
+import Testpage from "./pages/Testpage.jsx";
 import "./App.css";
 import { BrowserRouter, Route, Routes } from "react-router-dom";
 import Dashboard from "./pages/Dashboard.jsx";
@@ -13,6 +14,7 @@ function App() {
         <BrowserRouter>
           <Routes>
             <Route path="/login" element={<LoginPage />} />
+            <Route path="/testing" element={<Testpage />} />
             <Route path="*" element={<LoginPage />} />
             <Route path="/dashboard" element={<Dashboard />} />
           </Routes>
