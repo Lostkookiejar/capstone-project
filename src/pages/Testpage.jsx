@@ -28,6 +28,11 @@ export default function Testpage() {
         multiple
       />
       <button onClick={clearFileRef}>Clear Files</button>
+
+      <h3>Select Image</h3>
+      <select>
+        <option selected>default</option>
+      </select>
     </>
   );
 }
