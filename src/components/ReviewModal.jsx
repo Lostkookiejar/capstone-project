@@ -66,6 +66,11 @@ export default function ReviewModal({ show, onHide, editId }) {
     }
   }, [name]);
 
+  useEffect(() => {
+    if (newFile) {
+    }
+  }, [newFile]);
+
   //on user query
   const handleQuery = () => {
     if (!name) {
@@ -238,7 +243,7 @@ export default function ReviewModal({ show, onHide, editId }) {
                 </h1>
               </div>
               <div className="row w-100">
-                <div className="col-sm-11">
+                <div className="col-sm-10">
                   <FormControl
                     required
                     type="text"
@@ -249,12 +254,12 @@ export default function ReviewModal({ show, onHide, editId }) {
                     placeholder="Enter your review here"
                   />
                 </div>
-                <div className="col-sm-1 d-flex align-items-center justify-content-center">
+                <div className="col-sm-2 d-flex align-items-center justify-content-center">
                   <button
                     onClick={handleCreateReview}
                     className="btn btn-danger"
                   >
-                    <i class="bi bi-check-square-fill"></i>
+                    <i class="bi bi-check-square-fill"></i> Confirm
                   </button>
                 </div>
               </div>
@@ -270,6 +275,7 @@ export default function ReviewModal({ show, onHide, editId }) {
                     />
                   </div>
                   <div className="col-6 align-self-center justify-self-center">
+                    Rating:{" "}
                     {[1, 2, 3, 4, 5].map((num) => (
                       <FormCheck
                         required
@@ -296,12 +302,19 @@ export default function ReviewModal({ show, onHide, editId }) {
                   />
                 </div>
                 <div className="col-1">
-                  <button
-                    className="btn btn-danger"
-                    onClick={handleResetFileInput}
-                  >
-                    <i className="bi bi-x-square-fill"></i>
-                  </button>
+                  {newFile && (
+                    <button
+                      className="btn btn-danger"
+                      onClick={handleResetFileInput}
+                    >
+                      <i className="bi bi-x-square-fill"></i>
+                    </button>
+                  )}
+                  {!newFile && (
+                    <button className="btn btn-danger" disabled>
+                      <i className="bi bi-x-square-fill"></i>
+                    </button>
+                  )}
                 </div>
               </div>
 
@@ -316,7 +329,7 @@ export default function ReviewModal({ show, onHide, editId }) {
                 <h1>{edit.name}</h1>
               </div>
               <div className="row w-100">
-                <div className="col-sm-11">
+                <div className="col-sm-10">
                   <FormControl
                     required
                     type="text"
@@ -327,9 +340,9 @@ export default function ReviewModal({ show, onHide, editId }) {
                     placeholder="Enter your review here"
                   />
                 </div>
-                <div className="col-sm-1 d-flex align-items-center justify-content-center">
+                <div className="col-sm-2 d-flex align-items-center justify-content-center">
                   <button onClick={handleEditReview} className="btn btn-danger">
-                    <i class="bi bi-check-square-fill"></i>
+                    <i class="bi bi-check-square-fill"></i> Confirm
                   </button>
                 </div>
               </div>
@@ -345,6 +358,7 @@ export default function ReviewModal({ show, onHide, editId }) {
                     />
                   </div>
                   <div className="col-6 align-self-center justify-self-center">
+                    Rating:{" "}
                     {[1, 2, 3, 4, 5].map((num) => (
                       <FormCheck
                         required
@@ -371,12 +385,19 @@ export default function ReviewModal({ show, onHide, editId }) {
                   />
                 </div>
                 <div className="col-1">
-                  <button
-                    className="btn btn-danger"
-                    onClick={handleResetFileInput}
-                  >
-                    <i className="bi bi-x-square-fill"></i>
-                  </button>
+                  {newFile && (
+                    <button
+                      className="btn btn-danger"
+                      onClick={handleResetFileInput}
+                    >
+                      <i className="bi bi-x-square-fill"></i>
+                    </button>
+                  )}
+                  {!newFile && (
+                    <button className="btn btn-danger" disabled>
+                      <i className="bi bi-x-square-fill"></i>
+                    </button>
+                  )}
                 </div>
               </div>
 
